@@ -1,0 +1,24 @@
+Adversarial:
+- Multi adversary (system needs to decide how to handle in some optimal way) High value location defense or multi location defense.
+
+Multiple assets with values
+Multiple defenders with capabilities (single integrator)
+Multiple attackers with capabilities
+Discuss success rate as probability on a attacker to attacker basis (accounts for attacker vs defender capability on a case by case basis)
+
+Attacker dynamics?? Dumb or smart? Give attackers set targets. How do defenders estimate the targets?
+
+Attacker eliminated by colocation of attacker and defender.
+
+Some defenders can be slower than some attackers, this can come up in probability of intercept. One of the major conclusions could be probability of total success versus rate of individual success.
+
+Start maybe with saying that attacker defender interactions only happen on one to one basis.
+
+Overall: how to allocate defenders to attackers to maximize protection objective function.
+
+Assume central coordination?
+
+
+
+
+ 
