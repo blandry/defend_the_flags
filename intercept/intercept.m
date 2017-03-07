@@ -1,4 +1,4 @@
-function [vdhat,vahat,t_int,t_rem,success] = intercept(xd, Vd, xa, Va, xr, rd)
+function [vdhat,vahat,t_reach,t_int,t_loss,success] = intercept(xd, Vd, xa, Va, xr, rd)
 %Computes the velocity unit vector for a defender
 %   [vdhat,t,flag] = intercept(xd,Vd,xa,Va,xr,rd) where xd is position vector of
 %   defender, Vd is defender speed, xa is attacker position, Va is attacker
@@ -39,14 +39,13 @@ if flag > 0 && t_int < t_loss
                 break;
             end
         end
-        t_int = t(i);  
+        t_reach = t(i);  
     end
-    t_rem = t_loss - t_int;
     success = 1;
 else
     vdhat = [0 0];
+    t_reach = 0;
     t_int = 0;
-    t_rem = 0;
     success = 0;
 end
 

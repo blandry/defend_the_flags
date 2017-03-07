@@ -6,7 +6,7 @@ Va = 1;
 Vd = 5;
 rd = .1;
 
-[vdhat,vahat,t_int,t_rem,success] = intercept(xd,Vd,xa,Va,xr,rd);
+[vdhat,vahat,t_reach,t_int,t_rem,success] = intercept(xd,Vd,xa,Va,xr,rd);
 if success
     t = linspace(0,t_int,100);
     x1 = xd(1) + Vd*vdhat(1)*t;
