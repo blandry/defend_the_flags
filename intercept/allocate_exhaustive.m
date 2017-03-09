@@ -29,21 +29,29 @@ min_exp_cost = inf;
 best_sol = 0;
 best_M = zeros(D,A);
 
+m = zeros(1,D);
 for k=1:(A+1)^D
-
+    
     % defender/attacker pairs (the control input)
     % zero means no assignment
     % exhaustively enumerate solutions
-    m = dec2base(k-1,A,D);
+    for i=D:-1:1
+        if m(i) < A
+           m(i) = m(i) + 1;
+           break;
+        else
+           m(i) = 0;  
+        end
+    end
     
     M = zeros(D,A);
     for i=1:D
-        if floor(str2double(m(i)))>0
-            M(i,floor(str2double(m(i)))) = 1;
+        if m(i) > 0
+           M(i,m(i)) = 1;        
         end
     end
-
-    exp_cost(k) = c*(ones(R,1)-exp(G*log(ones(A,1)-exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1)))));% + (M*ones(A,1))'*Ca';
+    
+    exp_cost(k) = c*(ones(R,1)-exp(G*log(ones(A,1)-exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1))))) + (M*ones(A,1))'*Ca';
     
     if exp_cost(k) < min_exp_cost
         min_exp_cost = exp_cost(k);
@@ -54,7 +62,8 @@ for k=1:(A+1)^D
     waitbar(k/(A+1)^D);
 end
 
-fprintf('Optimal solution: %s\n',best_sol);
+fprintf('Optimal solution:\n');
+display(best_sol);
 
 [dnum,anum] = find(best_M==1);
 for i=1:numel(dnum)
