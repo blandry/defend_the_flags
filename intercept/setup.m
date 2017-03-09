@@ -8,8 +8,8 @@ r = [ctower, jet1, jet2, jet3, hangar];
 
 % Defenders
 d1 = struct('x',[0],'y',[0],'R',5,'S',.8,'V',10,'a',[],'vdhat',[],'t_int',[],'t_reach',[],'ca',.0);
-d2 = struct('x',[0],'y',[0],'R',5,'S',.8,'V',10,'a',[],'vdhat',[],'t_int',[],'t_reach',[],'ca',.0);
-d3 = struct('x',[0],'y',[0],'R',5,'S',.8,'V',10,'a',[],'vdhat',[],'t_int',[],'t_reach',[],'ca',.0);
+d2 = struct('x',[0],'y',[0],'R',5,'S',.8,'V',9,'a',[],'vdhat',[],'t_int',[],'t_reach',[],'ca',.0);
+d3 = struct('x',[0],'y',[0],'R',5,'S',.8,'V',8,'a',[],'vdhat',[],'t_int',[],'t_reach',[],'ca',.0);
 d = [d1,d2,d3];
 
 % Attackers

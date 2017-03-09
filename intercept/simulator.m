@@ -11,7 +11,7 @@ R = length(r);
 t = [0];
 defenders = cell(1,D);
 attackers = cell(1,A);
-Nleft = A;
+
 for i=1:D
     defenders{i} = [d(i).x, d(i).y];
 end
@@ -26,7 +26,7 @@ interaction = zeros(1,D);
 IM = repmat(struct('vdhat',0,'vahat',0,'t_reach',0,'t_int',0,'t_rem',0,'flag',0), D, A);
 
 % Run Simulation
-while Nleft > 0
+while sum([a.active]) > 0
     % Compute allocation M
     for i=1:D
         for j=1:A
@@ -81,7 +81,6 @@ while Nleft > 0
                     targ = a(j).t;
                     r(targ).damage = r(targ).damage + r(targ).val; % Target damaged
                     a(j).active = 0; % Attacker gone
-                    Nleft = Nleft - 1;
                     no_event = 0;
                 end
             end
@@ -90,36 +89,36 @@ while Nleft > 0
 
         % Update position of defenders and check for intercepts and attack
         for i=1:D
-            if interaction(i) == 1 % The defender is following the attacker
-                d(i).x = a(i).x;
-                d(i).y = a(i).y;
-            else
+            if interaction(i) == 1 && a(d(i).a).active == 1 % The defender is following the active attacker
+                d(i).x = a(d(i).a).x;
+                d(i).y = a(d(i).a).y;
+            elseif interaction(i) == 0 && a(d(i).a).active == 1
                 d(i).x = d(i).x + d(i).V*d(i).vdhat(1)*dt;
                 d(i).y = d(i).y + d(i).V*d(i).vdhat(2)*dt;
             end
             defenders{i} = [defenders{i}; [d(i).x, d(i).y]];
 
             % Update interaction array if needed
-            if d(i).t_reach <= t(end) % defender reached allocated attacker
+            if d(i).t_reach <= t(end) && a(d(i).a).active == 1 % defender reached allocated attacker
                 if interaction(i) == 0 % they werent interacting last time
-                    % deploynet(args);
-                    flag = 1; % pretend it won
+                    p = attack(d(i),a(d(i).a),1);
                     interaction(i) = 1;
                 else
-                    % attempt_collision(args);
+                    p = attack(d(i),a(d(i).a),0);
                 end
-
-                % If one the attacks was successful
-                if flag == 1
+                
+                % Evaluate if successful
+                rng('shuffle');
+                val = rand(1);
+                if val < p
                     a(d(i).a).active = 0;
-                    Nleft = Nleft - 1;
                     no_event = 0; % Reallocate
-                end
+                end            
                 d(i).t_reach = d(i).t_reach + 5; % Next time they can attack
             end
         end
 
-        if Nleft > 0
+        if sum([a.active]) > 0
             t = [t; t(end)+dt];
         end
     end

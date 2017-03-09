@@ -17,9 +17,11 @@ figure(1); hold on;
 for i=1:length(defenders)
     plot(defenders{i}(:,1),defenders{i}(:,2),'k');
 end
+
 for i=1:length(r)
     plot(r(i).x,r(i).y,'bo');
 end
+
 for i=1:length(attackers)
     plot(attackers{i}(:,1),attackers{i}(:,2),'r');
 end
