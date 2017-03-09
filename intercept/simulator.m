@@ -48,21 +48,24 @@ while Nleft > 0
         end
     end
 
+    % Computing the intercept probabilities
+    P = compute_probs(IM,a,d);
     % Using the intercept matrix IM give each defender an attacker
-    % [a,d,r] = allocate(IM,a,d,r,...);
-
+    d = allocate_exhaustive(IM,P,a,d,r);
+    %d = allocate_discrete_search(IM,P,a,d,r);
+    %d = allocate_market(IM,P,a,d,r);
+    
     % All below would be done in allocate function
-    M = eye(3);
-    [dnum,anum] = find(M==1);
-    for i=1:length(dnum)
-        j = anum(i);
-        d(i).a = j;
-        d(i).vdhat = IM(i,j).vdhat;
-        d(i).t_reach = IM(i,j).t_reach;
-        d(i).t_int = IM(i,j).t_int;
-        a(j).vahat = IM(i,j).vahat;
+    for i=1:D
+        d(i).vdhat = IM(i,d(i).a).vdhat;
+        d(i).t_reach = IM(i,d(i).a).t_reach;
+        d(i).t_int = IM(i,d(i).a).t_int;
     end
 
+    for j=1:A
+        a(j).vahat = IM(1,j).vahat;
+    end
+    
     % Begin one allocation period
     dt = .1;
     no_event = 1;

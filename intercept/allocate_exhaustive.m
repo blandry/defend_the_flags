@@ -1,6 +1,4 @@
-function allocate_exhaustive(IM,a,d,r)
-
-% clear all;
+function d = allocate_exhaustive(IM,P,a,d,r)
 
 % number of attackers (max 9)
 A = numel(a);
@@ -9,26 +7,27 @@ A = numel(a);
 D = numel(d);
 
 % cost of allocation
-Ca = rand(D,1);
+for i=1:numel(d)
+   Ca(i) = d(i).ca; 
+end
 
 % number of resources
-R = 2;
+R = numel(r);
 
 % cost of each resource
-c = rand(R,1)*10+1;
-
-% intercept success probability
-P = rand(D,A);
+for i=1:numel(r)
+   c(i) = r(i).val; 
+end
 
 % attacker/target pairs
-g = floor(rand(A,1)*R+1);
 G = zeros(R,A);
-for i=1:A
-    G(g(i),i) = 1;
+for j=1:A
+    G(a(j).t,j) = 1;
 end
 
 min_exp_cost = inf;
 best_sol = 0;
+best_M = zeros(D,A);
 
 for k=1:(A+1)^D
 
@@ -44,17 +43,22 @@ for k=1:(A+1)^D
         end
     end
 
-    exp_cost(k) = c'*(ones(R,1)-exp(G*log(ones(A,1)-exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1)))));% + (M*ones(A,1))'*Ca;
+    exp_cost(k) = c*(ones(R,1)-exp(G*log(ones(A,1)-exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1)))));% + (M*ones(A,1))'*Ca';
     
     if exp_cost(k) < min_exp_cost
         min_exp_cost = exp_cost(k);
         best_sol = m;
+        best_M = M;
     end
     
     waitbar(k/(A+1)^D);
 end
 
-display(sprintf('Optimal solution: %s',best_sol));
-hist(exp_cost);
+fprintf('Optimal solution: %s\n',best_sol);
+
+[dnum,anum] = find(best_M==1);
+for i=1:numel(dnum)
+    d(i).a = anum(i);
+end
 
 end
