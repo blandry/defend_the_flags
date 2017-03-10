@@ -1,6 +1,5 @@
 function P = compute_probs(IM,a,d)
 
-
 td = 5;
 
 A = numel(a);

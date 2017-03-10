@@ -47,13 +47,28 @@ while sum([a.active]) > 0
             a(j).t_destroy = t_loss + t(end);
         end
     end
-
+    % Remove attackers that are not active from allocation
+    % Sorry I know this is annoying....
+    [IM_active, a_active, map] = parse_active_attackers(IM, a);
+    
     % Computing the intercept probabilities
-    P = compute_probs(IM,a,d);
+    P = compute_probs(IM_active,a_active,d);
+    
     % Using the intercept matrix IM give each defender an attacker
-    d = allocate_exhaustive(IM,P,a,d,r);
+    d = allocate_exhaustive(IM_active,P,a_active,d,r);
     %d = allocate_discrete_search(IM,P,a,d,r);
     %d = allocate_market(IM,P,a,d,r);
+    
+    % Fix the map to attacker from allocation
+    current = [d.a];
+    for j=1:numel(map)
+        switches = find(current==j); % gives which defenders need d.a mapped from j to map(j)
+        if ~isempty(switches)
+            for i=1:numel(switches)
+                d(switches(i)).a = map(j);
+            end
+        end
+    end
     
     % All below would be done in allocate function
     for i=1:D
