@@ -67,7 +67,7 @@ display(best_sol);
 
 [dnum,anum] = find(best_M==1);
 for i=1:numel(dnum)
-    d(i).a = anum(i);
+    d(dnum(i)).a = anum(i);
 end
 
 end
