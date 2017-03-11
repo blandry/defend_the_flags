@@ -4,7 +4,7 @@ function [pij] = attack(di,aj,first)
 %   prob), 0 if not first attack
 
 Beta = 5;
-discount_factor = .5;
+discount_factor = .25;
 pij = 1/(1+exp(-Beta*(di.S-aj.S)));
 
 % For the first attack

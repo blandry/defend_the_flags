@@ -59,15 +59,21 @@ for k=1:(A+1)^D
         best_M = M;
     end
     
-    waitbar(k/(A+1)^D);
+    %waitbar(k/(A+1)^D);
 end
 
-fprintf('Optimal solution:\n');
-display(best_sol);
+%fprintf('Optimal solution:\n');
+%display(best_sol);
 
 [dnum,anum] = find(best_M==1);
-for i=1:numel(dnum)
-    d(dnum(i)).a = anum(i);
+
+for i=1:D
+    idx = find(dnum==i);
+    if ~isempty(idx)
+        d(dnum(idx)).a = anum(idx);
+    else
+        d(i).a = 0;
+    end
 end
 
 end

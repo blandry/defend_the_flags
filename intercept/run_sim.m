@@ -11,11 +11,11 @@ for i=1:length(a)
     a(i).t = g(i);
 end
 
-[attackers,defenders] = simulator(a,d,r);
+[attackers,defenders,t] = simulator(a,d,r);
 
 figure(1); hold on;
 for i=1:length(defenders)
-    plot(defenders{i}(:,1),defenders{i}(:,2),'k');
+    plot(defenders{i}(:,1),defenders{i}(:,2));
 end
 
 for i=1:length(r)
