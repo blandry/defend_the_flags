@@ -85,7 +85,7 @@ while sum([a.active]) > 0
     % Begin one allocation period
     dt = .1;
     no_event = 1;
-    for z=1:dt:5
+    while no_event
         % Update positions of attackers and check for target hits
         for j=1:A
             % Update if attacker alive and not at target yet
@@ -128,7 +128,7 @@ while sum([a.active]) > 0
                 val = rand(1);
                 if val < p
                     a(d(i).a).active = 0;
-                    fprintf('Defender %d neutralized attacker %d\n', i, d(i).a);
+                    fprintf('Defender %d neutralized attacker %d',
                     no_event = 0; % Reallocate
                 end            
                 d(i).t_reach = d(i).t_reach + 5; % Next time they can attack
@@ -137,10 +137,6 @@ while sum([a.active]) > 0
 
         if sum([a.active]) > 0
             t = [t; t(end)+dt];
-        end
-        
-        if ~no_event
-            break
         end
     end
 end
