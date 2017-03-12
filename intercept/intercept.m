@@ -44,8 +44,8 @@ if flag > 0 && t_int < t_loss
     success = 1;
 else
     vdhat = [0 0];
-    t_reach = 0;
-    t_int = 0;
+    t_reach = Inf;
+    t_int = Inf;
     success = 0;
 end
 

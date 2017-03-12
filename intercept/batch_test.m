@@ -11,12 +11,20 @@ for i=1:length(a)
     a(i).t = g(i);
 end
 
-[attackers,defenders,t,r,c] = simulator(a,d,r,3,'exhaustive');
+batch_size = 100;
+damage = zeros(1,batch_size);
+for i=1:batch_size
+    % Load the starting configuration from setup.m
+    load('config1.mat')
+    for j=1:length(a)
+        a(j).t = g(j);
+    end
+    [attackers,defenders,t,r,c] = simulator(a,d,r,0,'exhaustive');
+    damage(i) = sum([r.damage]);
+end
 
-total_damage = sum([r.damage]);
-
-figure(2);
-plot(t,c);
+mean(damage)
+var(damage)
 
 figure(1); hold on;
 for z = 1:size(defenders{1},1)

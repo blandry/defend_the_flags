@@ -1,6 +1,14 @@
-function [attackers, defenders, t] = simulator(a,d,r)
+function [attackers, defenders, t, r, cost_func] = simulator(a,d,r,realloc_period,alg)
 % Run the simulation
 %   Inputs; a,d,r structs containing values
+%           realloc_period: 0 for no realloc, Inf for realloc every event,
+%                           else the actual reallocation period value.
+realloc_on_event = 1;
+if realloc_period == 0
+    realloc_period = Inf;
+    realloc_on_event = 0;
+end
+
 
 % Begin simulation
 A = length(a);
@@ -11,6 +19,7 @@ R = length(r);
 t = [0];
 defenders = cell(1,D);
 attackers = cell(1,A);
+cost_func = [sum([r.val])];
 
 for i=1:D
     defenders{i} = [d(i).x, d(i).y];
@@ -40,11 +49,12 @@ while sum([a.active]) > 0
             IM(i,j).vahat = vahat;
             IM(i,j).t_reach = t_reach + t(end); % Add to current time
             IM(i,j).t_int = t_int + t(end); % Add to current time
-            IM(i,j).t_rem = t_loss - t_reach; % How long defender has after reaching attacker
+            IM(i,j).t_rem = max(0,t_loss - t_reach); % How long defender has after reaching attacker
             IM(i,j).flag = success;
             
             if xd(1) == xa(1) && xd(2) == xa(2) % already intercepted
                 IM(i,j).flag = 1;
+                IM(i,j).t_int = t(end);
                 IM(i,j).vdhat = vahat;
             end
 
@@ -63,10 +73,16 @@ while sum([a.active]) > 0
     P = compute_probs(IM_active,a_active,d);
     
     % Using the intercept matrix IM give each defender an attacker
-    %d = allocate_exhaustive(IM_active,P,a_active,d,r);
+    if strcmp(alg,'exhaustive')
+        d = allocate_exhaustive(IM_active,P,a_active,d,r);
+    elseif strcmp(alg, 'coord')
+        d = allocate_coord_descent(IM_active,P,a_active,d,r);
+    else
+        fprintf('Can"t think of an allocation');
+    end
     %d = allocate_discrete_search(IM,P,a,d,r);
     %d = allocate_market(IM,P,a,d,r);
-    d = allocate_coord_descent(IM,P,a,d,r);
+    
     
     % Fix the map to attacker from allocation
     current = [d.a];
@@ -78,7 +94,7 @@ while sum([a.active]) > 0
             end
         end
     end
-    disp([d.a])
+    %disp([d.a])
     
     % Set proper policy for each defender given the attacker they are
     % paired to
@@ -105,7 +121,7 @@ while sum([a.active]) > 0
     % Begin one allocation period
     dt = .1;
     no_event = 1;
-    for z=1:dt:5
+    for z=1:dt:realloc_period
         % Update positions of attackers and check for target hits
         for j=1:A
             % Update if attacker alive and not at target yet
@@ -153,7 +169,7 @@ while sum([a.active]) > 0
                     if val < p
                         a(d(i).a).active = 0;
                         no_event = 0; % Reallocate
-                        fprintf(1,'D %d kills A %d \n',i,d(i).a);
+                        %fprintf(1,'D %d kills A %d \n',i,d(i).a);
                     end            
                     d(i).t_reach = d(i).t_reach + 5; % Next time they can attack
                 end
@@ -161,11 +177,30 @@ while sum([a.active]) > 0
             defenders{i} = [defenders{i}; [d(i).x, d(i).y]];
         end
 
-        if sum([a.active]) >= 0
-            t = [t; t(end)+dt];
+        t = [t; t(end)+dt];
+        
+        M = zeros(D,numel(a_active));
+        for i=1:D
+            if d(i).a > 0 && d(i).a <= numel(a_active)
+                M(i,d(i).a) = 1;
+            end
         end
         
-        if ~no_event
+        % attacker/target pairs
+        G = zeros(R,numel(a_active));
+        for j=1:numel(a_active)
+            G(a(j).t,j) = 1;
+        end
+        
+        cost_func = [cost_func; exp_cost(M,[r.val],P,[d.ca],G)];
+        if isnan(cost_func(end))
+            hey;
+        end
+        if sum([a.active]) == 0
+            break; % All attackers are inactive
+        end
+        
+        if ~no_event && realloc_on_event
             break
         end
     end
