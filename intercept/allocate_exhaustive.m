@@ -1,4 +1,4 @@
-function d = allocate_exhaustive(IM,P,a,d,r)
+function d = allocate_exhaustive(P,a,d,r)
 
 % number of attackers (max 9)
 A = numel(a);

@@ -5,8 +5,10 @@ function [attackers, defenders, t, r, cost_func] = simulator(a,d,r,realloc_perio
 %                           else the actual reallocation period value.
 realloc_on_event = 1;
 if realloc_period == 0
-    realloc_period = Inf;
+    realloc_period = 100000;
     realloc_on_event = 0;
+elseif realloc_period == Inf
+    realloc_period = 100000;
 end
 
 
@@ -51,6 +53,9 @@ while sum([a.active]) > 0
             IM(i,j).t_int = t_int + t(end); % Add to current time
             IM(i,j).t_rem = max(0,t_loss - t_reach); % How long defender has after reaching attacker
             IM(i,j).flag = success;
+            if sum([a.active]) == 2 && i==1
+                continue
+            end
             
             if xd(1) == xa(1) && xd(2) == xa(2) % already intercepted
                 IM(i,j).flag = 1;
@@ -74,14 +79,16 @@ while sum([a.active]) > 0
     
     % Using the intercept matrix IM give each defender an attacker
     if strcmp(alg,'exhaustive')
-        d = allocate_exhaustive(IM_active,P,a_active,d,r);
+        d = allocate_exhaustive(P,a_active,d,r);
     elseif strcmp(alg, 'coord')
-        d = allocate_coord_descent(IM_active,P,a_active,d,r);
+        d = allocate_coord_descent(P,a_active,d,r);
+    elseif strcmp(alg, 'market')
+        d = market(P,a_active,d,r,1);
     else
         fprintf('Can"t think of an allocation');
     end
     %d = allocate_discrete_search(IM,P,a,d,r);
-    %d = allocate_market(IM,P,a,d,r);
+    
     
     
     % Fix the map to attacker from allocation
