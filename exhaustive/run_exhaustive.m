@@ -1,16 +1,16 @@
 clear all;
 
 % number of attackers
-A = 5;
+A = 10;
 
 % number of defenders
-D = 3;
+D = 6;
 
 % cost of allocation
 Ca = rand(1,D);
 
 % number of resources
-R = 2;
+R = 10;
 
 % cost of each resource
 c = rand(1,R)*10+1;
@@ -28,8 +28,10 @@ end
 min_exp_cost = inf;
 best_sol = 0;
 best_M = zeros(D,A);
+exp_cost = [];
 
 m = zeros(1,D);
+tic;
 for k=1:(A+1)^D
     
     % defender/attacker pairs (the control input)
@@ -59,10 +61,15 @@ for k=1:(A+1)^D
         best_M = M;
     end
     
-    waitbar(k/(A+1)^D);
+    %waitbar(k/(A+1)^D);
 end
+toc
 
 fprintf('Optimal solution:\n');
 display(best_sol);
+display(min_exp_cost);
 
+figure(1)
 histogram(exp_cost);
+
+run_bnb;
