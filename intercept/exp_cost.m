@@ -11,4 +11,6 @@ A = size(M,2);
 R = size(c,2);
 
 cost = c*(ones(R,1)-exp(G*log(ones(A,1)-exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1))))) + (M*ones(A,1))'*Ca';
+%cost = ones(1,R)*(c'.*G)*exp(log(.9999*ones(D,A)-M.*P)'*ones(D,1));
+
 end
