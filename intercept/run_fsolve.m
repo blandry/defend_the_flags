@@ -5,6 +5,9 @@ B = [1 -1];
 flag = 0;
 % Solve
 options = optimoptions('fsolve','Display','off');
+best_t_int = Inf;
+best_Vdy = 0;
+best_Vdx = 0;
 for i=1:2
     % Function to solve for interception point
     b = B(i);
@@ -19,40 +22,67 @@ for i=1:2
     if exitflag1 == 1 && exitflag2 == 1
         if t_int1 > 0 && t_int2 > 0
             [t_int, idx] = min([t_int1 t_int2]);
-            Vdy = Vdy_possible(idx);
-            Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
-            flag = 1;
-            break
+            if t_int < best_t_int
+                Vdy = Vdy_possible(idx);
+                Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
+                flag = 1;
+                best_t_int = t_int;
+                best_Vdy = Vdy;
+                best_Vdx = Vdx;
+            end
         elseif t_int1 > 0
             t_int = t_int1;
-            Vdy = Vdy1;
-            Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
-            flag = 1;
-            break
+            if t_int < best_t_int
+                Vdy = Vdy1;
+                Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
+                flag = 1;
+                best_t_int = t_int;
+                best_Vdy = Vdy;
+                best_Vdx = Vdx;
+            end
         elseif t_int2 > 0
             t_int = t_int2;
-            Vdy = Vdy2;
-            Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
-            flag = 1;
-            break
+            if t_int < best_t_int
+                Vdy = Vdy2;
+                Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
+                flag = 1;
+                best_t_int = t_int;
+                best_Vdy = Vdy;
+                best_Vdx = Vdx;
+            end
         end 
     elseif exitflag1 == 1 && exitflag2 ~= 1 && t_int1 > 0
         t_int = t_int1;
-        Vdy = Vdy1;
-        Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
-        flag = 1;
-        break
+        if t_int < best_t_int
+            Vdy = Vdy1;
+            Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
+            flag = 1;
+            best_t_int = t_int;
+            best_Vdy = Vdy;
+            best_Vdx = Vdx;
+        end
     elseif exitflag1 ~= 1 && exitflag2 == 1 && t_int2 > 0
         t_int = t_int2;
-        Vdy = Vdy2;
-        Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
-        flag = 1;
-        break
+        if t_int < best_t_int
+            Vdy = Vdy2;
+            Vdx = b*real(sqrt(Vd^2 - real(Vdy)^2));
+            flag = 1;
+            best_t_int = t_int;
+            best_Vdy = Vdy;
+            best_Vdx = Vdx;
+        end 
     end
+end
+if flag == 1
+    t_int = best_t_int;
+    Vdy = best_Vdy;
+    Vdx = best_Vdx;
+else
+    t_int = 0;
     Vdy = 0;
     Vdx = 0;
-    t_int = 0;
 end
+    
 
 end
 

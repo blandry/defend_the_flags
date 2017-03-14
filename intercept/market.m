@@ -25,10 +25,10 @@ for i=1:D
     ds(i).order = tosort(2,I);
     
     % Choose the one that gives best profit
-    ds(i).choice = ds(i).order(1);
-    
+    ds(i).choice = ds(i).order(1);   
 end
 
+losers = zeros(1,numel(ds));
 while sum(market.as) > 0 && sum(market.ds) > 0
     % Update the buyer list for each attacker by adding all buyers still left
     % in market
@@ -39,12 +39,32 @@ while sum(market.as) > 0 && sum(market.ds) > 0
         as(j).buyers = [];
     end
     
+    % Update losing defender choice and add to attackers buyer list
     for k=1:numel(dleft)
         i = dleft(k);
-        as(ds(i).choice).buyers = [as(ds(i).choice).buyers, i];
+        % Check if it was a loser last time
+        if losers(i) == 1 % Then i is a loser from the last round
+            % Find the highest priority attacker that is still on market
+            for j=1:A
+                if ~isempty(find(aleft==ds(i).order(j),1)) % If j on the market
+                    ds(i).choice = ds(i).order(j);
+                    market.ds(i) = 1;
+                    break
+                else
+                    ds(i).choice = 0;
+                    ds(i).award = 0;
+                    market.ds(i) = 0;
+                end
+            end
+        end
+        % If the choice was able to be set
+        if ds(i).choice ~= 0
+            as(ds(i).choice).buyers = [as(ds(i).choice).buyers, i];
+        end
     end
 
     % Award contracts for attackers left in market to the lowest bidder
+    losers = zeros(1,numel(ds));
     for k=1:numel(aleft)
         j = aleft(k);
         buyers = as(j).buyers;
@@ -56,28 +76,18 @@ while sum(market.as) > 0 && sum(market.ds) > 0
                     lowbidder = b;
                 end
             end
-            as(j).award = [lowbidder]; % Mark that award went to lowbidder
-            ds(lowbidder).award = j; % Mark that lowbidder got j
-            ds(lowbidder).cprofit = ds(lowbidder).profits(j);
+            % Check to make sure the lowest bidder is doesnt have zero
+            % probability
+            if P(lowbidder,j) ~= 0
+                as(j).award = [lowbidder]; % Mark that award went to lowbidder
+                ds(lowbidder).award = j; % Mark that lowbidder got j
+                ds(lowbidder).cprofit = ds(lowbidder).profits(j);
+            end 
             market.as(j) = 0;
             market.ds(lowbidder) = 0;
 
             % Some defenders may have lost their bid, update their choice
-            idx = find(buyers~=lowbidder);
-            losers = buyers(idx);
-            if ~isempty(losers) % If there are in fact some losers
-                for k=1:numel(losers)
-                    loser = losers(k);
-                    idx = find(ds(loser).order == j);
-                    if numel(ds(loser).order) > idx
-                        ds(loser).choice = ds(loser).order(idx+1); % Next best
-                    else
-                        ds(loser).choice = 0; % No attackers left :(
-                        ds(loser).award = 0;
-                        market.ds(loser) = 0;
-                    end
-                end
-            end
+            losers(buyers(buyers~=lowbidder)) = 1;
         end
     end
 end
@@ -109,21 +119,29 @@ if enable == 1
             ds(i).swprofit = 0;
 
             % They had no award after main contract round, so no attackers open
-            if ds(i).award == 0 
+            if isempty(ds(i).award)
                 best_profit = 0;
                 potential = ds(i).order; % attackers interested in
                 for k=1:numel(potential)
                     % Compute the extra revenue you would get from working with di
                     j = potential(k);
-                    di = as(j).award;
-                    profit = r(a(j).t).val*((1-P(di,j)) - (1-P(di,j))*(1-P(i,j)));
-                    if profit > best_profit
-                        best_profit = profit;
-                        ds(i).a = j;
-                        ds(i).swprofit = profit;
+                    if isempty(find(aopen==j,1)) % attacker isnt in the non allocated group           
+                        % Compute the extra revenue you would get from working
+                        % with group to get aj
+                        coalition = as(j).award; % coalition has at least one
+                        Pcoalfails = 1;
+                        for k=1:numel(coalition)
+                            di = coalition(k);
+                            Pcoalfails = Pcoalfails*(1-P(di,j));
+                        end
+                        profit = r(a(j).t).val*(Pcoalfails - Pcoalfails*(1-P(i,j)));
+                        if profit > best_profit % Then you would prefer attacker j over current
+                            best_profit = profit;
+                            ds(i).a = j;
+                            ds(i).swprofit = profit;
+                        end
                     end
                 end
-
             elseif ds(i).award ~= ds(i).order(1) % They didn't get first choice
                 best_profit = ds(i).cprofit;
 
@@ -209,7 +227,6 @@ if enable == 1
                 as(j).award = [as(j).award, best_i];
             end
         end
-        disp(numswitchers)
     end
 end
 
