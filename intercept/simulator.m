@@ -33,40 +33,10 @@ end
 % Initialize interaction array
 interaction = zeros(1,D);
 
-% To compute allocation, need to compute interception for all defenders
-IM = repmat(struct('vdhat',0,'vahat',0,'t_reach',0,'t_int',0,'t_rem',0,'flag',0), D, A);
-
 % Run Simulation
 while sum([a.active]) > 0
     % Compute intercept information for all defender attacker pairs
-    for i=1:D
-        for j=1:A
-            xd = [d(i).x,d(i).y];
-            xa = [a(j).x,a(j).y];
-            xr = [r(a(j).t).x,r(a(j).t).y];
-
-            % Compute intercept point for d_i and a_j
-            [vdhat,vahat,t_reach,t_int,t_loss,success] = intercept(xd,d(i).V,xa,a(j).V,xr,d(i).R);
-            IM(i,j).vdhat = vdhat;
-            IM(i,j).vahat = vahat;
-            IM(i,j).t_reach = t_reach + t(end); % Add to current time
-            IM(i,j).t_int = t_int + t(end); % Add to current time
-            IM(i,j).t_rem = max(0,t_loss - t_reach); % How long defender has after reaching attacker
-            IM(i,j).flag = success;
-            if sum([a.active]) == 2 && i==1
-                continue
-            end
-            
-            if xd(1) == xa(1) && xd(2) == xa(2) % already intercepted
-                IM(i,j).flag = 1;
-                IM(i,j).t_int = t(end);
-                IM(i,j).vdhat = vahat;
-            end
-
-            % Record the time that attacker will hit its target
-            a(j).t_destroy = t_loss + t(end);
-        end
-    end
+    [IM,a,d] = intercept_matrix(a,d,r,t(end));
     
     % Log current defender allocation
     d_old = [d.a];
@@ -199,9 +169,9 @@ while sum([a.active]) > 0
             G(a(j).t,j) = 1;
         end
         
-        cost_func = [cost_func; exp_cost(M,[r.val],P,[d.ca],G)];
+        cost_func = [cost_func; real(exp_cost(M,[r.val],P,[d.ca],G))];
         if isnan(cost_func(end))
-            hey;
+            disp('hey');
         end
         if sum([a.active]) == 0
             break; % All attackers are inactive
