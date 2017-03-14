@@ -1,4 +1,4 @@
-function [attackers, defenders, t, r, cost_func] = simulator(a,d,r,realloc_period,alg)
+function [attackers, defenders, t, r, cost_func, damage] = simulator(a,d,r,realloc_period,alg)
 % Run the simulation
 %   Inputs; a,d,r structs containing values
 %           realloc_period: 0 for no realloc, Inf for realloc every event,
@@ -19,6 +19,7 @@ R = length(r);
 
 % Arrays to hold trajectories
 t = [0];
+damage = [0];
 defenders = cell(1,D);
 attackers = cell(1,A);
 cost_func = [sum([r.val])];
@@ -34,6 +35,7 @@ end
 interaction = zeros(1,D);
 
 % Run Simulation
+dam = 0;
 while sum([a.active]) > 0
     % Compute intercept information for all defender attacker pairs
     [IM,a,d] = intercept_matrix(a,d,r,t(end));
@@ -109,6 +111,7 @@ while sum([a.active]) > 0
                 else
                     targ = a(j).t;
                     r(targ).damage = r(targ).damage + r(targ).val; % Target damaged
+                    dam = dam + r(targ).val;
                     a(j).active = 0; % Attacker gone
                     no_event = 0; % Reallocate
                 end
@@ -155,6 +158,7 @@ while sum([a.active]) > 0
         end
 
         t = [t; t(end)+dt];
+        damage = [damage; dam];
         
         M = zeros(D,numel(a_active));
         for i=1:D

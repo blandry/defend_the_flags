@@ -1,4 +1,4 @@
-function animation(fname,t,attackers,defenders,r,points)
+function animation(fname,t,attackers,defenders,r,d,points)
 %Creates a plot animation and movie with name fname "filename"
 % points is the number of time points to sample
 
@@ -26,6 +26,7 @@ yatt = yatt(sample,:);
 xdef = xdef(sample,:);
 ydef = ydef(sample,:);
 t = t(sample);
+d = d(sample);
 
 % Compute max range
 xmax = max([max(xdef),max(xatt)]);
@@ -35,12 +36,14 @@ ymin = min([min(ydef),min(yatt)]);
 
 % Animation
 figure('visible','on');
-plot([r.x],[r.y],'k.','markersize',5);
+plot([r.x],[r.y],'ks','markersize',5);
 hold on;
-handle1 = plot(xatt(1,:), yatt(1,:),'rx', 'MarkerSize', 6, 'LineWidth', 2);
-handle2 = plot(xdef(1,:), ydef(1,:),'bo', 'MarkerSize', 6, 'LineWidth', 2);
+handle1 = plot(xatt(1,:), yatt(1,:),'rx', 'MarkerSize', 8, 'LineWidth', 2);
+handle2 = plot(xdef(1,:), ydef(1,:),'bo', 'MarkerSize', 8, 'LineWidth', 2);
 axis equal
 axis([xmin xmax ymin ymax]);
+str = sprintf('Damage = %d',d(1));
+handle3 = text(xmin + .015*abs(xmin-xmax),ymax - .03*abs(ymax-ymin),str);
 
 v = VideoWriter(fname);
 % Desired movie length
@@ -53,6 +56,7 @@ for id = 1:length(t)
    % Update XData and YData
    set(handle1, 'XData', xatt(id,:)  , 'YData', yatt(id,:));
    set(handle2, 'XData', xdef(id,:)  , 'YData', ydef(id,:));
+   set(handle3, 'String', sprintf('Damage = %d',d(id)));
    drawnow;
    frame = getframe(gcf);
    im = frame2im(frame);

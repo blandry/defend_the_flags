@@ -10,7 +10,8 @@ G = zeros(length(r),length(a));
 for i=1:length(a)
     a(i).t = g(i);
 end
-[a,d,r] = random_setup(4,3,3);
+
+[a,d,r] = random_setup(4,4,3);
 [attackers,defenders,t,r,c] = simulator(a,d,r,Inf,'market');
 
 total_damage = sum([r.damage]);
