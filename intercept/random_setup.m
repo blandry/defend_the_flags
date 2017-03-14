@@ -7,7 +7,7 @@ a = repmat(struct('x',[],'y',[],'S',0,'V',0,'t',[],'vahat',[],'active',1,'t_dest
 radar = 1000; % 1km radar detection
 heading = [0, 360]; % Range of heading attackers come from
 th_a = (heading(2)-heading(1)).*rand(A,1) + heading(1);
-strengths = 10*rand(1,A);
+strengths = rand(1,A);
 velocities = 10*rand(1,A)+5;
 for j=1:A
     a(j).x = radar*cosd(th_a(j));
@@ -18,7 +18,7 @@ end
 
 % Setup defender random attributes
 d = repmat(struct('x',[0],'y',[0],'R',5,'S',0,'V',0,'a',0,'vdhat',[],'t_int',[],'t_reach',[],'ca',0), 1, D);
-strengths = 10*rand(1,D);
+strengths = rand(1,D);
 velocities = 10*rand(1,D)+5;
 for i=1:D
     d(i).S = strengths(i);
