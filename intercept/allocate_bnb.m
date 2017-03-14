@@ -1,28 +1,28 @@
-clear all;
+function [d] = allocate_bnb(P,a,d,r)
 
-% number of attackers
-A = 9;
+% number of attackers (max 9)
+A = numel(a);
 
-% number of defenders
-D = 5;
+% number of defenders (max 9)
+D = numel(d);
 
 % cost of allocation
-Ca = rand(1,D);
+for i=1:numel(d)
+   Ca(i) = d(i).ca; 
+end
 
 % number of resources
-R = 9;
+R = numel(r);
 
 % cost of each resource
-c = rand(1,R)*10+1;
-
-% intercept success probability
-P = rand(D,A);
+for i=1:numel(r)
+   c(i) = r(i).val; 
+end
 
 % attacker/target pairs
-g = floor(rand(A,1)*R+1);
 G = zeros(R,A);
-for i=1:A
-    G(g(i),i) = 1;
+for j=1:A
+    G(a(j).t,j) = 1;
 end
 
 sorted_c = sort(c);
@@ -34,23 +34,19 @@ for j=0:A
 end
 
 % use a heuristic for an initial guess
-% best_sol = zeros(D,1);
-% i = 1;
-% for j=1:A
-%    if i >= D
-%        break;
-%    end
-%    target = find(G(:,j)==1);
-%    if c(target)*P(i,j) > Ca(i)
-%        best_sol(i) = j;
-%    end
-%    i = i+1;
-% end
-% best_sol = best_sol';
-d_copy = allocate_coord_descent(P,a,d,r);
-for i=1:D
-    best_sol(i) = d(i).a;
+best_sol = zeros(D,1);
+i = 1;
+for j=1:A
+   if i >= D
+       break;
+   end
+   target = find(G(:,j)==1);
+   if c(target)*P(i,j) > Ca(i)
+       best_sol(i) = j;
+   end
+   i = i+1;
 end
+best_sol = best_sol';
 best_sol_cost = cost(c,Ca,D,A,R,best_sol,G,P);
 num_sol_tested_bnb = 0;
 exp_cost = [];
@@ -66,7 +62,6 @@ sols_too_sparse = 0.0001;
 num_best_update = 0;
 min_best_update = 5;
 
-tic;
 while numel(sols)>0
    if iter > max_iter
        %display('reached max iterations');
@@ -113,12 +108,9 @@ while numel(sols)>0
      end
    end
 end
-toc;
 
-fprintf('Optimal solution:\n');
-display(best_sol');
-display(best_sol_cost);
+for i = 1:D
+    d(i).a = best_sol(i);
+end
 
-hold on
-histogram(exp_cost);
-legend('solutions tested by exhaustive search','solutions tested by branch and bound');
+end

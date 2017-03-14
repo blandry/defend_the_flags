@@ -1,11 +1,12 @@
-clear; clc; close all;
+close all;
 
-% Load the starting configuration from setup.m
-load('config1.mat')
+% Load the starting configuration
+config_name = 'config2.mat';
+load(config_name)
 
 % Attacker/target pairs
 rng(1,'twister');
-g = floor(rand(length(a),1)*length(r)+1);
+g = [1,2,3,4,5]'; %floor(rand(length(a),1)*length(r)+1);
 G = zeros(length(r),length(a));
 for i=1:length(a)
     a(i).t = g(i);
@@ -15,11 +16,11 @@ batch_size = 100;
 damage = zeros(1,batch_size);
 for i=1:batch_size
     % Load the starting configuration from setup.m
-    load('config1.mat')
+    load(config_name)
     for j=1:length(a)
         a(j).t = g(j);
     end
-    [attackers,defenders,t,r,c] = simulator(a,d,r,0,'exhaustive');
+    [attackers,defenders,t,r,c] = simulator(a,d,r,5,'coord');
     damage(i) = sum([r.damage]);
 end
 
