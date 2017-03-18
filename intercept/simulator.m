@@ -1,4 +1,4 @@
-function [attackers, defenders, t, r, cost_func, damage] = simulator(a,d,r,realloc_period,alg)
+function [attackers, defenders, t, r, cost_func, damage] = simulator(a,d,r,realloc_period,alg,dtype,cfunc)
 % Run the simulation
 %   Inputs; a,d,r structs containing values
 %           realloc_period: 0 for no realloc, Inf for realloc every event,
@@ -53,15 +53,14 @@ while sum([a.active]) > 0
     if strcmp(alg,'exhaustive')
         d = allocate_exhaustive(P,a_active,d,r);
     elseif strcmp(alg, 'coord')
-        d = allocate_coord_descent(P,a_active,d,r);
+        d = allocate_coord_descent(P,a_active,d,r,cfunc);
     elseif strcmp(alg, 'market')
         d = market(P,a_active,d,r,1);
+    elseif strcmp(alg, 'bnb')
+        d = allocate_bnb(P,a_active,d,r,cfunc);
     else
         fprintf('Can"t think of an allocation');
     end
-    %d = allocate_discrete_search(IM,P,a,d,r);
-    
-    
     
     % Fix the map to attacker from allocation
     current = [d.a];
@@ -73,7 +72,6 @@ while sum([a.active]) > 0
             end
         end
     end
-    %disp([d.a])
     
     % Set proper policy for each defender given the attacker they are
     % paired to
@@ -110,8 +108,15 @@ while sum([a.active]) > 0
                     a(j).y = a(j).y + a(j).V*a(j).vahat(2)*dt;
                 else
                     targ = a(j).t;
-                    r(targ).damage = r(targ).damage + r(targ).val; % Target damaged
-                    dam = dam + r(targ).val;
+                    if strcmp(dtype, 'Total')
+                        if r(targ).damage == 0 % Its hasn't been hit yet
+                            r(targ).damage = r(targ).damage + r(targ).val; % Target damaged
+                            dam = dam + r(targ).val;
+                        end
+                    elseif strcmp(dtype, 'Incremental')
+                        r(targ).damage = r(targ).damage + r(targ).val; % Target damaged
+                        dam = dam + r(targ).val;
+                    end
                     a(j).active = 0; % Attacker gone
                     no_event = 0; % Reallocate
                 end
@@ -173,7 +178,7 @@ while sum([a.active]) > 0
             G(a(j).t,j) = 1;
         end
         
-        cost_func = [cost_func; real(exp_cost(M,[r.val],P,[d.ca],G))];
+        cost_func = [cost_func; real(exp_cost(M,[r.val],P,[d.ca],G,cfunc))];
         if isnan(cost_func(end))
             disp('hey');
         end

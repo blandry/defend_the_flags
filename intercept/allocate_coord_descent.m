@@ -1,4 +1,4 @@
-function d = allocate_coord_descent(P,a,d,r)
+function d = allocate_coord_descent(P,a,d,r,cfunc)
 
 % number of attackers (max 9)
 A = numel(a);
@@ -44,7 +44,7 @@ for i=1:D
             Mp(i,j) = 1;
         end
 
-        cost = exp_cost(Mp,c,P,Ca,G);
+        cost = exp_cost(Mp,c,P,Ca,G,cfunc);
         if cost < best_cost
             best_cost = cost;
             best_j = j;

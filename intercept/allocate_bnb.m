@@ -1,4 +1,4 @@
-function [d] = allocate_bnb(P,a,d,r)
+function [d] = allocate_bnb(P,a,d,r,cfunc)
 
 % number of attackers (max 9)
 A = numel(a);
@@ -47,7 +47,7 @@ for j=1:A
    i = i+1;
 end
 best_sol = best_sol';
-best_sol_cost = cost(c,Ca,D,A,R,best_sol,G,P);
+best_sol_cost = cost(c,Ca,D,A,R,best_sol,G,P,cfunc);
 num_sol_tested_bnb = 0;
 exp_cost = [];
 
@@ -80,7 +80,7 @@ while numel(sols)>0
    sol = sols(2:end,i);
    sols(:,i) = [];
    if numel(find(sol==-1))==0
-       sol_cost = cost(c,Ca,D,A,R,sol,G,P);
+       sol_cost = cost(c,Ca,D,A,R,sol,G,P,cfunc);
        num_sol_tested_bnb = num_sol_tested_bnb + 1;
        exp_cost(num_sol_tested_bnb) = sol_cost;
        if sol_cost < best_sol_cost
