@@ -63,32 +63,35 @@ while sum(market.as) > 0 && sum(market.ds) > 0
         end
     end
 
-    % Award contracts for attackers left in market to the lowest bidder
+    % For ONLY ONE attacker that is left in market, find the lowest bidder
     losers = zeros(1,numel(ds));
     for k=1:numel(aleft)
-        j = aleft(k);
-        buyers = as(j).buyers;
-        if ~isempty(buyers) % If the attacker has buyers
-            lowbidder = buyers(1);
-            for k=1:numel(buyers)
-                b = buyers(k);
-                if ds(b).bids(j) < ds(lowbidder).bids(j)
-                    lowbidder = b;
-                end
-            end
-            % Check to make sure the lowest bidder is doesnt have zero
-            % probability
-            if P(lowbidder,j) ~= 0
-                as(j).award = [lowbidder]; % Mark that award went to lowbidder
-                ds(lowbidder).award = j; % Mark that lowbidder got j
-                ds(lowbidder).cprofit = ds(lowbidder).profits(j);
-            end 
-            market.as(j) = 0;
-            market.ds(lowbidder) = 0;
-
-            % Some defenders may have lost their bid, update their choice
-            losers(buyers(buyers~=lowbidder)) = 1;
+        j=aleft(k);
+        if ~isempty(as(j).buyers)
+            buyers = as(j).buyers;
+            break
         end
+    end
+    if ~isempty(buyers) % If the attacker has buyers
+        lowbidder = buyers(1);
+        for k=1:numel(buyers)
+            b = buyers(k);
+            if ds(b).bids(j) < ds(lowbidder).bids(j)
+                lowbidder = b;
+            end
+        end
+        % Check to make sure the lowest bidder is doesnt have zero
+        % probability
+        if P(lowbidder,j) ~= 0
+            as(j).award = [lowbidder]; % Mark that award went to lowbidder
+            ds(lowbidder).award = j; % Mark that lowbidder got j
+            ds(lowbidder).cprofit = ds(lowbidder).profits(j);
+        end
+        market.as(j) = 0;
+        market.ds(lowbidder) = 0;
+        
+        % Some defenders may have lost their bid, update their choice
+        losers(buyers(buyers~=lowbidder)) = 1;
     end
 end
 
