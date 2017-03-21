@@ -1,11 +1,11 @@
 close all;
 %% Problem setup
 N = 100;
-A = 12;
-D = 12;
-R = 6;
+A = 7;
+D = 7;
+R = 5;
 
-reallocate = 1; % 1 for reallocate on events, 0 for no reallocation
+reallocate = 0; % 1 for reallocate on events, 0 for no reallocation
 damage = 'Total';
 cfunc = 'Total';
 
@@ -28,8 +28,8 @@ for idx=1:N
     damage_m = sum([r_m.damage]);
     [att_g,def_g,t_g,r_g,~,d_g] = simulator(a,d,r,allocate,'coord',damage,cfunc);
     damage_g = sum([r_g.damage]);
-    %[att_b,def_b,t_b,r_b,~,d_b] = simulator(a,d,r,allocate,'bnb',damage,cfunc);
-    %damage_b = sum([r_b.damage]);
+    [att_b,def_b,t_b,r_b,~,d_b] = simulator(a,d,r,allocate,'bnb',damage,cfunc);
+    damage_b = sum([r_b.damage]);
 
     % Compute total damage
     max_damage = 0;
@@ -43,19 +43,19 @@ for idx=1:N
         
     market_damage(idx) = damage_m/max_damage;
     greedy_damage(idx) = damage_g/max_damage;
-    %bnb_damage(idx) = damage_b/max_damage;
+    bnb_damage(idx) = damage_b/max_damage;
     possible_damage(idx) = max_damage;
     disp(idx/N)
 end
 
 %% Plotting Results
-%hist([100*bnb_damage', 100*market_damage', 100*greedy_damage'],10);
-hist([100*market_damage', 100*greedy_damage'],10);
+hist([100*bnb_damage', 100*market_damage', 100*greedy_damage'],10);
+%hist([100*market_damage', 100*greedy_damage'],10);
 legstr1 = sprintf('Branch/Bound, \\mu=%.2f',mean(100*bnb_damage));
 legstr2 = sprintf('Market, \\mu=%.2f',mean(100*market_damage));
 legstr3 = sprintf('Greedy, \\mu=%.2f',mean(100*greedy_damage));
-%legend(legstr1,legstr2,legstr3);
-legend(legstr2,legstr3);
+legend(legstr1,legstr2,legstr3);
+%legend(legstr2,legstr3);
 xlabel('Percent Max Damage (%)');
 ylabel('Simulation Outcome Frequency');
 if strcmp(damage,cfunc)
